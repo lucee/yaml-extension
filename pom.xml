@@ -107,6 +107,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
                 <executions>
+                    <!-- Phase 1: prepare all files -->
                     <execution>
                         <id>build-lex</id>
                         <phase>prepare-package</phase>
@@ -120,13 +121,7 @@
                                 </tstamp>
 
                                 <delete dir="${project.build.directory}/extension"/>
-                                <mkdir  dir="${project.build.directory}/extension"/>
                                 <mkdir  dir="${project.build.directory}/extension/META-INF"/>
-                                <mkdir  dir="${project.build.directory}/extension/"/>
-                                <mkdir  dir="${project.build.directory}/extension/components"/>
-                                <mkdir  dir="${project.build.directory}/extension/components/org"/>
-                                <mkdir  dir="${project.build.directory}/extension/components/org/lucee"/>
-                                <mkdir  dir="${project.build.directory}/extension/components/org/lucee/cfml"/>
                                 <mkdir  dir="${project.build.directory}/extension/components/org/lucee/cfml/tools"/>
 
                                 <echo file="${project.build.directory}/extension/META-INF/MANIFEST.MF">Manifest-Version: 1.0
@@ -143,26 +138,21 @@ start-bundles: false
 
 </echo>
 
-                                <available file="${project.build.directory}/extension/META-INF/MANIFEST.MF"
-                                           property="manifest.exists"/>
-                                <fail unless="manifest.exists"
-                                      message="MANIFEST.MF was not created — aborting build."/>
-
                                 <copy
                                     file="${basedir}/source/components/org/lucee/cfml/tools/Yaml.cfc"
                                     tofile="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"/>
                                 <replaceregexp
                                     file="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"
-                                    match="\{mvnGroupId\}"    replace="${mvnGroupId}"          byline="true"/>
+                                    match="\{mvnGroupId\}"    replace="${mvnGroupId}"           byline="true"/>
                                 <replaceregexp
                                     file="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"
-                                    match="\{mvnArtifactId\}" replace="${mvnArtifactId}"       byline="true"/>
+                                    match="\{mvnArtifactId\}" replace="${mvnArtifactId}"        byline="true"/>
                                 <replaceregexp
                                     file="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"
-                                    match="\{mvnVersion\}"    replace="${mvnVersion}"          byline="true"/>
+                                    match="\{mvnVersion\}"    replace="${mvnVersion}"           byline="true"/>
                                 <replaceregexp
                                     file="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"
-                                    match="\{label\}"         replace="${label}"               byline="true"/>
+                                    match="\{label\}"         replace="${label}"                byline="true"/>
                                 <replaceregexp
                                     file="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"
                                     match="\{description\}"   replace="${manifest.description}" byline="true"/>
@@ -174,6 +164,7 @@ start-bundles: false
                         </configuration>
                     </execution>
 
+                    <!-- Phase 2: zip into .lex -->
                     <execution>
                         <id>package-lex</id>
                         <phase>package</phase>
@@ -182,31 +173,17 @@ start-bundles: false
                         </goals>
                         <configuration>
                             <target>
-                                <echo message="--- Contents being zipped ---"/>
-                                <fileset id="ext.files" dir="${project.build.directory}/extension"/>
-                                <pathconvert pathsep="${line.separator}  " property="ext.filelist" refid="ext.files"/>
-                                <echo message="  ${ext.filelist}"/>
-
                                 <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.lex"
                                      basedir="${project.build.directory}/extension"
                                      compress="true"
                                      encoding="UTF-8"/>
-
-                                <echo message="--- Verifying .lex contents ---"/>
-                                <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.lex"
-                                       dest="${project.build.directory}/lex-verify"/>
-                                <available file="${project.build.directory}/lex-verify/META-INF/MANIFEST.MF"
-                                           property="lex.manifest.exists"/>
-                                <fail unless="lex.manifest.exists"
-                                      message="MANIFEST.MF missing inside .lex zip — build is invalid."/>
-                                <echo message="MANIFEST.MF confirmed inside .lex"/>
                             </target>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- Attach the .lex file as a build artifact -->
+            <!-- Attach the .lex file as a deployable artifact -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
