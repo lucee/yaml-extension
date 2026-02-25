@@ -5,7 +5,7 @@
 
     <groupId>org.lucee</groupId>
     <artifactId>yaml-extension</artifactId>
-    <version>2.5.1-SNAPSHOT</version>
+    <version>2.5.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Yaml Extension</name>
     <description>Provides native YAML support for Lucee via SnakeYAML 2.5. Exposes a simple component interface for reading and writing YAML files, parsing and serializing YAML strings, multi-document support, validation, JSON interoperability, and deep struct merging. Dependencies are resolved automatically via Maven at install time.</description>
