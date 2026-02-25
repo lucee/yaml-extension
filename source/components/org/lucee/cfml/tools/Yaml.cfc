@@ -83,7 +83,7 @@ component
             var docs = getYaml().loadAll(inputStream);
             var iter = docs.iterator();
             while (iter.hasNext()) {
-                results.append(iter.next());
+                results.append(JavaProxy::toCFML(iter.next()));
             }
             return results;
         }
