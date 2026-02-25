@@ -105,7 +105,6 @@ Dependencies are resolved automatically via Maven at install time.</description>
 
     <build>
         <plugins>
-            <!-- Build the .lex extension file entirely inline — no build.xml needed -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -119,14 +118,19 @@ Dependencies are resolved automatically via Maven at install time.</description>
                         </goals>
                         <configuration>
                             <target>
-                                <!-- Timestamp -->
                                 <tstamp>
                                     <format property="NOW" pattern="yyyy-MM-dd HH:mm:ss"/>
                                 </tstamp>
 
-                                <!-- Fresh working directory -->
+                                <!-- Fresh working directory — explicit parent-first mkdir -->
                                 <delete dir="${project.build.directory}/extension"/>
+                                <mkdir  dir="${project.build.directory}/extension"/>
                                 <mkdir  dir="${project.build.directory}/extension/META-INF"/>
+                                <mkdir  dir="${project.build.directory}/extension/context"/>
+                                <mkdir  dir="${project.build.directory}/extension/context/components"/>
+                                <mkdir  dir="${project.build.directory}/extension/context/components/org"/>
+                                <mkdir  dir="${project.build.directory}/extension/context/components/org/lucee"/>
+                                <mkdir  dir="${project.build.directory}/extension/context/components/org/lucee/cfml"/>
                                 <mkdir  dir="${project.build.directory}/extension/context/components/org/lucee/cfml/tools"/>
 
                                 <!-- Write MANIFEST.MF -->
@@ -142,6 +146,12 @@ start-bundles: false
 lucee-core-version: "${luceeCoreVersion}"
 maven: "${mvnGroupId}:${mvnArtifactId}:${mvnVersion}"
 </echo>
+
+                                <!-- Verify MANIFEST.MF was written -->
+                                <available file="${project.build.directory}/extension/META-INF/MANIFEST.MF"
+                                           property="manifest.exists"/>
+                                <fail unless="manifest.exists"
+                                      message="MANIFEST.MF was not created — aborting build."/>
 
                                 <!-- Copy and token-replace Yaml.cfc -->
                                 <copy
@@ -168,10 +178,15 @@ maven: "${mvnGroupId}:${mvnArtifactId}:${mvnVersion}"
                                     file="${basedir}/source/images/logo.png"
                                     todir="${project.build.directory}/extension/META-INF"/>
 
+                                <!-- List what will be zipped — makes CI logs debuggable -->
+                                <echo message="--- Contents of extension directory ---"/>
+                                <fileset id="ext.files" dir="${project.build.directory}/extension"/>
+                                <pathconvert pathsep="${line.separator}  " property="ext.filelist" refid="ext.files"/>
+                                <echo message="  ${ext.filelist}"/>
+
                                 <!-- Package as .lex -->
-                                <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.lex">
-                                    <zipfileset dir="${project.build.directory}/extension"/>
-                                </zip>
+                                <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.lex"
+                                     basedir="${project.build.directory}/extension"/>
                             </target>
                             <exportAntProperties>true</exportAntProperties>
                         </configuration>
