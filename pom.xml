@@ -122,12 +122,12 @@
                                 <delete dir="${project.build.directory}/extension"/>
                                 <mkdir  dir="${project.build.directory}/extension"/>
                                 <mkdir  dir="${project.build.directory}/extension/META-INF"/>
-                                <mkdir  dir="${project.build.directory}/extension/context"/>
-                                <mkdir  dir="${project.build.directory}/extension/context/components"/>
-                                <mkdir  dir="${project.build.directory}/extension/context/components/org"/>
-                                <mkdir  dir="${project.build.directory}/extension/context/components/org/lucee"/>
-                                <mkdir  dir="${project.build.directory}/extension/context/components/org/lucee/cfml"/>
-                                <mkdir  dir="${project.build.directory}/extension/context/components/org/lucee/cfml/tools"/>
+                                <mkdir  dir="${project.build.directory}/extension/"/>
+                                <mkdir  dir="${project.build.directory}/extension/components"/>
+                                <mkdir  dir="${project.build.directory}/extension/components/org"/>
+                                <mkdir  dir="${project.build.directory}/extension/components/org/lucee"/>
+                                <mkdir  dir="${project.build.directory}/extension/components/org/lucee/cfml"/>
+                                <mkdir  dir="${project.build.directory}/extension/components/org/lucee/cfml/tools"/>
 
                                 <echo file="${project.build.directory}/extension/META-INF/MANIFEST.MF">Manifest-Version: 1.0
 Built-Date: ${NOW}
@@ -149,22 +149,22 @@ start-bundles: false
                                       message="MANIFEST.MF was not created — aborting build."/>
 
                                 <copy
-                                    file="${basedir}/source/context/components/org/lucee/cfml/tools/Yaml.cfc"
-                                    tofile="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"/>
+                                    file="${basedir}/source/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    tofile="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"/>
                                 <replaceregexp
-                                    file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    file="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"
                                     match="\{mvnGroupId\}"    replace="${mvnGroupId}"          byline="true"/>
                                 <replaceregexp
-                                    file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    file="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"
                                     match="\{mvnArtifactId\}" replace="${mvnArtifactId}"       byline="true"/>
                                 <replaceregexp
-                                    file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    file="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"
                                     match="\{mvnVersion\}"    replace="${mvnVersion}"          byline="true"/>
                                 <replaceregexp
-                                    file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    file="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"
                                     match="\{label\}"         replace="${label}"               byline="true"/>
                                 <replaceregexp
-                                    file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    file="${project.build.directory}/extension/components/org/lucee/cfml/tools/Yaml.cfc"
                                     match="\{description\}"   replace="${manifest.description}" byline="true"/>
 
                                 <copy
