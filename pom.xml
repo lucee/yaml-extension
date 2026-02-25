@@ -8,11 +8,7 @@
     <version>2.5.0-BETA</version>
     <packaging>pom</packaging>
     <name>Yaml Extension</name>
-    <description>Provides native YAML support for Lucee via SnakeYAML 2.5. 
-Exposes a simple component interface for reading and writing YAML files, 
-parsing and serializing YAML strings, multi-document support, validation, 
-JSON interoperability, and deep struct merging. 
-Dependencies are resolved automatically via Maven at install time.</description>
+    <description>Provides native YAML support for Lucee via SnakeYAML 2.5. Exposes a simple component interface for reading and writing YAML files, parsing and serializing YAML strings, multi-document support, validation, JSON interoperability, and deep struct merging. Dependencies are resolved automatically via Maven at install time.</description>
     <url>https://github.com/lucee/extension-yaml</url>
 
     <properties>
@@ -23,6 +19,7 @@ Dependencies are resolved automatically via Maven at install time.</description>
         <mvnVersion>2.5</mvnVersion>
         <label>Yaml</label>
         <luceeCoreVersion>7.0.0.110</luceeCoreVersion>
+        <manifest.description>Native YAML support for Lucee via SnakeYAML 2.5: read, write, parse, serialize, validate, merge and JSON interop.</manifest.description>
         <release.url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</release.url>
         <snapshot.url>https://oss.sonatype.org/content/repositories/snapshots/</snapshot.url>
     </properties>
@@ -112,7 +109,7 @@ Dependencies are resolved automatically via Maven at install time.</description>
                 <executions>
                     <execution>
                         <id>build-lex</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
@@ -122,7 +119,6 @@ Dependencies are resolved automatically via Maven at install time.</description>
                                     <format property="NOW" pattern="yyyy-MM-dd HH:mm:ss"/>
                                 </tstamp>
 
-                                <!-- Fresh working directory — explicit parent-first mkdir -->
                                 <delete dir="${project.build.directory}/extension"/>
                                 <mkdir  dir="${project.build.directory}/extension"/>
                                 <mkdir  dir="${project.build.directory}/extension/META-INF"/>
@@ -133,7 +129,6 @@ Dependencies are resolved automatically via Maven at install time.</description>
                                 <mkdir  dir="${project.build.directory}/extension/context/components/org/lucee/cfml"/>
                                 <mkdir  dir="${project.build.directory}/extension/context/components/org/lucee/cfml/tools"/>
 
-                                <!-- Write MANIFEST.MF -->
                                 <echo file="${project.build.directory}/extension/META-INF/MANIFEST.MF">Manifest-Version: 1.0
 Built-Date: ${NOW}
 version: "${project.version}"
@@ -141,19 +136,18 @@ id: "${id}"
 groupId: "${project.groupId}"
 artifactId: "${project.artifactId}"
 name: "${label}"
-description: "${project.description}"
+description: "${manifest.description}"
 start-bundles: false
 lucee-core-version: "${luceeCoreVersion}"
 maven: "${mvnGroupId}:${mvnArtifactId}:${mvnVersion}"
+
 </echo>
 
-                                <!-- Verify MANIFEST.MF was written -->
                                 <available file="${project.build.directory}/extension/META-INF/MANIFEST.MF"
                                            property="manifest.exists"/>
                                 <fail unless="manifest.exists"
                                       message="MANIFEST.MF was not created — aborting build."/>
 
-                                <!-- Copy and token-replace Yaml.cfc -->
                                 <copy
                                     file="${basedir}/source/context/components/org/lucee/cfml/tools/Yaml.cfc"
                                     tofile="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"/>
@@ -171,24 +165,42 @@ maven: "${mvnGroupId}:${mvnArtifactId}:${mvnVersion}"
                                     match="\{label\}"         replace="${label}"               byline="true"/>
                                 <replaceregexp
                                     file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
-                                    match="\{description\}"   replace="${project.description}" byline="true"/>
+                                    match="\{description\}"   replace="${manifest.description}" byline="true"/>
 
-                                <!-- Copy logo -->
                                 <copy
                                     file="${basedir}/source/images/logo.png"
                                     todir="${project.build.directory}/extension/META-INF"/>
+                            </target>
+                        </configuration>
+                    </execution>
 
-                                <!-- List what will be zipped — makes CI logs debuggable -->
-                                <echo message="--- Contents of extension directory ---"/>
+                    <execution>
+                        <id>package-lex</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo message="--- Contents being zipped ---"/>
                                 <fileset id="ext.files" dir="${project.build.directory}/extension"/>
                                 <pathconvert pathsep="${line.separator}  " property="ext.filelist" refid="ext.files"/>
                                 <echo message="  ${ext.filelist}"/>
 
-                                <!-- Package as .lex -->
                                 <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.lex"
-                                     basedir="${project.build.directory}/extension"/>
+                                     basedir="${project.build.directory}/extension"
+                                     compress="true"
+                                     encoding="UTF-8"/>
+
+                                <echo message="--- Verifying .lex contents ---"/>
+                                <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.lex"
+                                       dest="${project.build.directory}/lex-verify"/>
+                                <available file="${project.build.directory}/lex-verify/META-INF/MANIFEST.MF"
+                                           property="lex.manifest.exists"/>
+                                <fail unless="lex.manifest.exists"
+                                      message="MANIFEST.MF missing inside .lex zip — build is invalid."/>
+                                <echo message="MANIFEST.MF confirmed inside .lex"/>
                             </target>
-                            <exportAntProperties>true</exportAntProperties>
                         </configuration>
                     </execution>
                 </executions>
@@ -213,34 +225,6 @@ maven: "${mvnGroupId}:${mvnArtifactId}:${mvnVersion}"
                                     <type>lex</type>
                                 </artifact>
                             </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Clean up Ant working directories after package -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>cleanup</id>
-                        <phase>post-package</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                        <configuration>
-                            <filesets>
-                                <fileset>
-                                    <directory>${project.build.directory}/antrun</directory>
-                                    <includes><include>**/*</include></includes>
-                                </fileset>
-                                <fileset>
-                                    <directory>${project.build.directory}/archive-tmp</directory>
-                                    <includes><include>**/*</include></includes>
-                                </fileset>
-                            </filesets>
                         </configuration>
                     </execution>
                 </executions>
