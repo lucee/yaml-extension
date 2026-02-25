@@ -3,7 +3,8 @@
  */
 component
     displayname="{label}"
-    description="{description}" {
+    description="{description}"
+    javasettings='{"maven":["{mvnGroupId}:{mvnArtifactId}:{mvnVersion}"]}' {
 
     import org.yaml.snakeyaml.*;
     import org.yaml.snakeyaml.DumperOptions;
