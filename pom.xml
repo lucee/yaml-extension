@@ -1,0 +1,273 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.lucee</groupId>
+    <artifactId>yaml-extension</artifactId>
+    <version>2.5.0-BETA</version>
+    <packaging>pom</packaging>
+    <name>Yaml Extension</name>
+    <description>Provides native YAML support for Lucee via SnakeYAML 2.5. 
+Exposes a simple component interface for reading and writing YAML files, 
+parsing and serializing YAML strings, multi-document support, validation, 
+JSON interoperability, and deep struct merging. 
+Dependencies are resolved automatically via Maven at install time.</description>
+    <url>https://github.com/lucee/extension-yaml</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <id>A71D636B-D668-4D93-886F9A5D34A9343D</id>
+        <mvnGroupId>org.lucee</mvnGroupId>
+        <mvnArtifactId>yaml</mvnArtifactId>
+        <mvnVersion>2.5</mvnVersion>
+        <label>Yaml</label>
+        <luceeCoreVersion>7.0.0.110</luceeCoreVersion>
+        <release.url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</release.url>
+        <snapshot.url>https://oss.sonatype.org/content/repositories/snapshots/</snapshot.url>
+    </properties>
+
+    <scm>
+        <url>https://github.com/lucee/extension-yaml</url>
+        <connection>scm:git:git://github.com/lucee/extension-yaml.git</connection>
+        <developerConnection>scm:git:git@github.com:lucee/extension-yaml.git</developerConnection>
+        <tag>${project.version}</tag>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>The GNU Lesser General Public License, Version 2.1</name>
+            <url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>micstriit</id>
+            <name>Michael Offner</name>
+            <email>michael@lucee.org</email>
+            <organization>Lucee Association Switzerland</organization>
+            <organizationUrl>http://lucee.org</organizationUrl>
+            <roles>
+                <role>Project-Administrator</role>
+                <role>Developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
+
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <files>
+                                        <file>${project.build.directory}/${project.artifactId}-${project.version}.lex</file>
+                                    </files>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-release-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <configuration>
+                            <autoVersionSubmodules>true</autoVersionSubmodules>
+                            <useReleaseProfile>false</useReleaseProfile>
+                            <releaseProfiles>release</releaseProfiles>
+                            <goals>deploy</goals>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <!-- Build the .lex extension file entirely inline — no build.xml needed -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>build-lex</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- Timestamp -->
+                                <tstamp>
+                                    <format property="NOW" pattern="yyyy-MM-dd HH:mm:ss"/>
+                                </tstamp>
+
+                                <!-- Fresh working directory -->
+                                <delete dir="${project.build.directory}/extension"/>
+                                <mkdir  dir="${project.build.directory}/extension/META-INF"/>
+                                <mkdir  dir="${project.build.directory}/extension/context/components/org/lucee/cfml/tools"/>
+
+                                <!-- Write MANIFEST.MF -->
+                                <echo file="${project.build.directory}/extension/META-INF/MANIFEST.MF">Manifest-Version: 1.0
+Built-Date: ${NOW}
+version: "${project.version}"
+id: "${id}"
+groupId: "${project.groupId}"
+artifactId: "${project.artifactId}"
+name: "${label}"
+description: "${project.description}"
+start-bundles: false
+lucee-core-version: "${luceeCoreVersion}"
+maven: "${mvnGroupId}:${mvnArtifactId}:${mvnVersion}"
+</echo>
+
+                                <!-- Copy and token-replace Yaml.cfc -->
+                                <copy
+                                    file="${basedir}/source/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    tofile="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"/>
+                                <replaceregexp
+                                    file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    match="\{mvnGroupId\}"    replace="${mvnGroupId}"          byline="true"/>
+                                <replaceregexp
+                                    file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    match="\{mvnArtifactId\}" replace="${mvnArtifactId}"       byline="true"/>
+                                <replaceregexp
+                                    file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    match="\{mvnVersion\}"    replace="${mvnVersion}"          byline="true"/>
+                                <replaceregexp
+                                    file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    match="\{label\}"         replace="${label}"               byline="true"/>
+                                <replaceregexp
+                                    file="${project.build.directory}/extension/context/components/org/lucee/cfml/tools/Yaml.cfc"
+                                    match="\{description\}"   replace="${project.description}" byline="true"/>
+
+                                <!-- Copy logo -->
+                                <copy
+                                    file="${basedir}/source/images/logo.png"
+                                    todir="${project.build.directory}/extension/META-INF"/>
+
+                                <!-- Package as .lex -->
+                                <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.lex">
+                                    <zipfileset dir="${project.build.directory}/extension"/>
+                                </zip>
+                            </target>
+                            <exportAntProperties>true</exportAntProperties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Attach the .lex file as a build artifact -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.lex</file>
+                                    <type>lex</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Clean up Ant working directories after package -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>cleanup</id>
+                        <phase>post-package</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.build.directory}/antrun</directory>
+                                    <includes><include>**/*</include></includes>
+                                </fileset>
+                                <fileset>
+                                    <directory>${project.build.directory}/archive-tmp</directory>
+                                    <includes><include>**/*</include></includes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Deploy the .lex file to Maven repository -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.0.0-M1</version>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy-file</goal>
+                        </goals>
+                        <configuration>
+                            <file>${project.build.directory}/${project.artifactId}-${project.version}.lex</file>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${project.version}</version>
+                            <repositoryId>ossrh</repositoryId>
+                            <url>${deploy.url}</url>
+                            <packaging>lex</packaging>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Sonatype Central publishing -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>ossrh</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
