@@ -18,7 +18,7 @@
 ---><cfscript>
 component extends="org.lucee.cfml.test.LuceeTestCase" labels="yaml" {
 
-    variables.yaml    = new org.lucee.cfml.tools.Yaml();
+    
     variables.testDir = "";
 
     function beforeAll() {
@@ -33,16 +33,28 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="yaml" {
 
     function run(testResults, testBox) {
 
+
+        // -------------------------------------------------------------------------
+        describe("check correctly installed", function() {
+
+            it("does the component exist?", function() {
+                var components=ComponentListPackage("org.lucee.cfml.tools");
+                systemOutput(components,1,1);
+            });
+        });
+
         // -------------------------------------------------------------------------
         describe("parse / serialize", function() {
 
             it("parses a simple struct from a YAML string", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var result = yaml.parse("name: Lucee#chr(10)#version: 7");
                 expect(result.name).toBe("Lucee");
                 expect(result.version).toBe(7);
             });
 
             it("parses a nested struct", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var result = yaml.parse("
 server:
   host: localhost
@@ -53,12 +65,14 @@ server:
             });
 
             it("parses a YAML array", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var result = yaml.parse("items:#chr(10)#  - one#chr(10)#  - two#chr(10)#  - three");
                 expect(result.items.len()).toBe(3);
                 expect(result.items[2]).toBe("two");
             });
 
             it("round-trips a struct through serialize and parse", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var data   = { name: "Lucee", active: true, count: 42 };
                 var result = yaml.parse(yaml.serialize(data));
                 expect(result.name).toBe("Lucee");
@@ -71,6 +85,7 @@ server:
         describe("read / write", function() {
 
             it("writes a YAML file and reads it back", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var filePath = variables.testDir & "/config.yaml";
                 yaml.write({ environment: "production", debug: false }, filePath);
                 expect(fileExists(filePath)).toBeTrue();
@@ -80,6 +95,7 @@ server:
             });
 
             it("throws when reading a missing file", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 expect(function() {
                     yaml.read(variables.testDir & "/does-not-exist.yaml");
                 }).toThrow();
@@ -90,6 +106,7 @@ server:
         describe("multi-document", function() {
 
             it("parses multiple documents from a YAML string", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var result = yaml.parseAll("name: doc1#chr(10)#---#chr(10)#name: doc2");
                 expect(result.len()).toBe(2);
                 expect(result[1].name).toBe("doc1");
@@ -97,6 +114,7 @@ server:
             });
 
             it("reads multiple documents from a YAML file", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var filePath = variables.testDir & "/multi.yaml";
                 fileWrite(filePath, "name: doc1#chr(10)#---#chr(10)#name: doc2");
                 var result = yaml.readAll(filePath);
@@ -109,14 +127,17 @@ server:
         describe("validate", function() {
 
             it("returns true for valid YAML", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 expect(yaml.validate("name: Lucee")).toBeTrue();
             });
 
             it("returns false for invalid YAML", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 expect(yaml.validate("key: [unclosed")).toBeFalse();
             });
 
             it("throws for invalid YAML when throwOnInvalid is true", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 expect(function() {
                     yaml.validate("key: [unclosed", true);
                 }).toThrow(type="YAMLTool.InvalidYAML");
@@ -127,6 +148,7 @@ server:
         describe("merge", function() {
 
             it("merges two structs with overlay winning on conflict", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var result = yaml.merge(
                     { host: "localhost", port: 8080, debug: false },
                     { port: 9090, debug: true }
@@ -137,6 +159,7 @@ server:
             });
 
             it("merges two YAML strings", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var result = yaml.merge(
                     "host: localhost#chr(10)#port: 8080",
                     "port: 9090#chr(10)#debug: true"
@@ -150,18 +173,21 @@ server:
         describe("JSON interop", function() {
 
             it("converts a JSON string to a YAML string", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var result = yaml.fromJSON(serializeJSON({ name: "Lucee", version: 7 }));
                 expect(result).toInclude("name:");
                 expect(result).toInclude("Lucee");
             });
 
             it("converts a YAML string to a JSON string", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var result = deserializeJSON(yaml.toJSON("name: Lucee#chr(10)#version: 7"));
                 expect(result.name).toBe("Lucee");
                 expect(result.version).toBe(7);
             });
 
             it("round-trips complex data through JSON and YAML", function() {
+                var yaml    = new org.lucee.cfml.tools.Yaml();
                 var original = { name: "Lucee", tags: ["fast", "modern"], meta: { lts: true } };
                 var result   = deserializeJSON(yaml.toJSON(yaml.fromJSON(serializeJSON(original))));
                 expect(result.name).toBe("Lucee");
