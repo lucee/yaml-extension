@@ -77,9 +77,8 @@ component
      * Read a YAML file that contains multiple documents
      */
     function readAll(required string filePath) {
-        var inputStream = null;
         try {
-            inputStream = new FileInputStream(arguments.filePath);
+            var inputStream = new FileInputStream(arguments.filePath);
             var results = [];
             var docs = getYaml().loadAll(inputStream);
             var iter = docs.iterator();
