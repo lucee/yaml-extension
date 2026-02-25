@@ -39,7 +39,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="yaml" {
 
             it("does the component exist?", function() {
                 var components=ComponentListPackage("org.lucee.cfml.tools");
-                systemOutput(components,1,1);
+                expect(arrayContains(components,"Yaml")>0).toBeTrue();
+            });
+            it("global javasettings are okay?", function() {
+                systemOutput("Global Java Settings: " ,1,1);
+                    js=getPageContext().getConfig().getJavaSettings();
+                    loop collection=js.getAllResources() index="i" item="res" {
+                        systemOutput(res,1,1);
+                    }
+                    systemOutput(js.getResourcesTranslated(),1,1);
             });
         });
 
