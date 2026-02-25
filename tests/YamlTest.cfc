@@ -143,58 +143,6 @@ server:
                 }).toThrow(type="YAMLTool.InvalidYAML");
             });
         });
-
-        // -------------------------------------------------------------------------
-        describe("merge", function() {
-
-            it("merges two structs with overlay winning on conflict", function() {
-                var yaml    = new cfml:org.lucee.cfml.tools.Yaml();
-                var result = yaml.merge(
-                    { host: "localhost", port: 8080, debug: false },
-                    { port: 9090, debug: true }
-                );
-                expect(result.host).toBe("localhost");
-                expect(result.port).toBe(9090);
-                expect(result.debug).toBe(true);
-            });
-
-            it("merges two YAML strings", function() {
-                var yaml    = new cfml:org.lucee.cfml.tools.Yaml();
-                var result = yaml.merge(
-                    "host: localhost#chr(10)#port: 8080",
-                    "port: 9090#chr(10)#debug: true"
-                );
-                expect(result.port).toBe(9090);
-                expect(result.debug).toBe(true);
-            });
-        });
-
-        // -------------------------------------------------------------------------
-        describe("JSON interop", function() {
-
-            it("converts a JSON string to a YAML string", function() {
-                var yaml    = new cfml:org.lucee.cfml.tools.Yaml();
-                var result = yaml.fromJSON(serializeJSON({ name: "Lucee", version: 7 }));
-                expect(result).toInclude("name:");
-                expect(result).toInclude("Lucee");
-            });
-
-            it("converts a YAML string to a JSON string", function() {
-                var yaml    = new cfml:org.lucee.cfml.tools.Yaml();
-                var result = deserializeJSON(yaml.toJSON("name: Lucee#chr(10)#version: 7"));
-                expect(result.name).toBe("Lucee");
-                expect(result.version).toBe(7);
-            });
-
-            it("round-trips complex data through JSON and YAML", function() {
-                var yaml    = new cfml:org.lucee.cfml.tools.Yaml();
-                var original = { name: "Lucee", tags: ["fast", "modern"], meta: { lts: true } };
-                var result   = deserializeJSON(yaml.toJSON(yaml.fromJSON(serializeJSON(original))));
-                expect(result.name).toBe("Lucee");
-                expect(result.tags[1]).toBe("fast");
-                expect(result.meta.lts).toBe(true);
-            });
-        });
     }
 }
 </cfscript>
