@@ -44,10 +44,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="yaml" {
             it("global javasettings are okay?", function() {
                 systemOutput("Global Java Settings: " ,1,1);
                     js=getPageContext().getConfig().getJavaSettings();
+                    var hasJar=false;
                     loop collection=js.getAllResources() index="i" item="res" {
-                        systemOutput(res,1,1);
+                        if (findNoCase("snakeyaml", res&"") > 0) {
+                            hasJar = true;
+                        }
                     }
-                    systemOutput(js.getResourcesTranslated(),1,1);
+                    expect(hasJar).toBeTrue();
             });
         });
 
