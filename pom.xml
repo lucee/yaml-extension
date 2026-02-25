@@ -137,9 +137,9 @@ groupId: "${project.groupId}"
 artifactId: "${project.artifactId}"
 name: "${label}"
 description: "${manifest.description}"
-start-bundles: false
 lucee-core-version: "${luceeCoreVersion}"
 maven: "${mvnGroupId}:${mvnArtifactId}:${mvnVersion}"
+start-bundles: false
 
 </echo>
 
