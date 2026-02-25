@@ -14,8 +14,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <id>A71D636B-D668-4D93-886F9A5D34A9343D</id>
-        <mvnGroupId>org.lucee</mvnGroupId>
-        <mvnArtifactId>yaml</mvnArtifactId>
+        <mvnGroupId>org.yaml</mvnGroupId>
+        <mvnArtifactId>snakeyaml</mvnArtifactId>
         <mvnVersion>2.5</mvnVersion>
         <label>Yaml</label>
         <luceeCoreVersion>7.0.0.110</luceeCoreVersion>
