@@ -5,7 +5,7 @@
 
     <groupId>org.lucee</groupId>
     <artifactId>yaml-extension</artifactId>
-    <version>2.5.2-BETA</version>
+    <version>2.5.3-BETA</version>
     <packaging>pom</packaging>
     <name>Yaml Extension</name>
     <description>Provides native YAML support for Lucee via SnakeYAML 2.5. Exposes a simple component interface for reading and writing YAML files, parsing and serializing YAML strings, multi-document support, validation, JSON interoperability, and deep struct merging. Dependencies are resolved automatically via Maven at install time.</description>
@@ -13,7 +13,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
         <id>A71D636B-D668-4D93-886F9A5D34A9343D</id>
+        <image>https://raw.githubusercontent.com/lucee/extension-yaml/master/source/images/logo.png</image>
+        <buildDate>${maven.build.timestamp}</buildDate>
         <mvnGroupId>org.yaml</mvnGroupId>
         <mvnArtifactId>snakeyaml</mvnArtifactId>
         <mvnVersion>2.5</mvnVersion>
@@ -65,7 +68,7 @@
             </activation>
             <build>
                 <plugins>
-                    <plugin>
+<plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
                         <version>3.0.1</version>
@@ -103,6 +106,32 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <configuration>
+                    <flattenMode>bom</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
