@@ -5,11 +5,11 @@
 
     <groupId>org.lucee</groupId>
     <artifactId>yaml-extension</artifactId>
-    <version>2.5.4-BETA</version>
+    <version>2.5.4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Yaml Extension</name>
     <description>Provides native YAML support for Lucee via SnakeYAML 2.5. Exposes a simple component interface for reading and writing YAML files, parsing and serializing YAML strings, multi-document support, validation, JSON interoperability, and deep struct merging. Dependencies are resolved automatically via Maven at install time.</description>
-    <url>https://github.com/lucee/extension-yaml</url>
+    <url>https://github.com/lucee/yaml-extension</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,14 +23,12 @@
         <label>Yaml</label>
         <luceeCoreVersion>7.0.0.110</luceeCoreVersion>
         <manifest.description>Native YAML support for Lucee via SnakeYAML 2.5: read, write, parse, serialize, validate, merge and JSON interop.</manifest.description>
-        <release.url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</release.url>
-        <snapshot.url>https://oss.sonatype.org/content/repositories/snapshots/</snapshot.url>
     </properties>
 
     <scm>
-        <url>https://github.com/lucee/extension-yaml</url>
-        <connection>scm:git:git://github.com/lucee/extension-yaml.git</connection>
-        <developerConnection>scm:git:git@github.com:lucee/extension-yaml.git</developerConnection>
+        <url>https://github.com/lucee/yaml-extension</url>
+        <connection>scm:git:git://github.com/lucee/yaml-extension.git</connection>
+        <developerConnection>scm:git:git@github.com:lucee/yaml-extension.git</developerConnection>
         <tag>${project.version}</tag>
     </scm>
 
@@ -111,6 +109,8 @@
                 <version>1.6.0</version>
                 <configuration>
                     <flattenMode>bom</flattenMode>
+                    <!-- flattened POM, used by the S3 upload (packaging pom is skipped by default) -->
+                    <updatePomFile>true</updatePomFile>
                 </configuration>
                 <executions>
                     <execution>
@@ -231,31 +231,6 @@ start-bundles: false
                                     <type>lex</type>
                                 </artifact>
                             </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Deploy the .lex file to Maven repository -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.0.0-M1</version>
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy-file</goal>
-                        </goals>
-                        <configuration>
-                            <file>${project.build.directory}/${project.artifactId}-${project.version}.lex</file>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <version>${project.version}</version>
-                            <repositoryId>ossrh</repositoryId>
-                            <url>${deploy.url}</url>
-                            <packaging>lex</packaging>
                         </configuration>
                     </execution>
                 </executions>
